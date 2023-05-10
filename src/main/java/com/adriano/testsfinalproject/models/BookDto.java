@@ -9,8 +9,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record BookDto(
+        String id,
         @NotBlank(message = "O título é obrigatório") String title,
-        @Size(max = 500, message = "O resumo deve ter no máximo 500 caracteres") String synopsis,
+        @NotBlank(message = "O resumo é obrigatório")
+        @Size(max = 500, message = "O resumo deve ter no máximo 500 caracteres")
+        String synopsis,
         String summary,
         @Min(value = 20, message = "O preço deve ser no mínimo 20") BigDecimal price,
         @Min(value = 100, message = "O número de páginas deve ser no mínimo 100") int numPages,
@@ -20,6 +23,7 @@ public record BookDto(
 
     public static BookDto fromBook(Book book) {
         return new BookDto(
+                book.getId(),
                 book.getTitle(),
                 book.getSynopsis(),
                 book.getSummary(),

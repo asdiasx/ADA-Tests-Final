@@ -27,29 +27,17 @@ public class BookController {
 
     @GetMapping("/{id}")
     public ResponseEntity<BookDto> getBook(@PathVariable("id") String id) {
-        var answer = bookService.findById(id).orElse(null);
-        if (answer == null) {
-            return ResponseEntity.notFound().build();
-        }
+        var answer = bookService.findById(id);
         return ResponseEntity.ok(BookDto.fromBook(answer));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeBook(@PathVariable("id") String id) {
-        var answer = bookService.findById(id).orElse(null);
-        if (answer == null) {
-            return ResponseEntity.notFound().build();
-        }
-        bookService.delete(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<BookDto> removeBook(@PathVariable("id") String id) {
+        return ResponseEntity.ok(BookDto.fromBook(bookService.delete(id)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<BookDto> updateBook(@PathVariable("id") String id, @Valid @RequestBody BookDto updatedBook) {
-        var answer = bookService.findById(id).orElse(null);
-        if (answer == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(bookService.updateBook(id, updatedBook));
     }
 
@@ -69,5 +57,11 @@ public class BookController {
             errors.put(fieldName, errorMessage);
         });
         return errors;
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public String handleNotFoundException(IllegalArgumentException ex) {
+        return ("{ \"erro\": \"%s\" }").formatted(ex.getMessage());
     }
 }

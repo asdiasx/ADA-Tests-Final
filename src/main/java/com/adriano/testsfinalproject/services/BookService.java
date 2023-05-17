@@ -31,8 +31,8 @@ public class BookService {
         );
     }
 
-    public Book delete(String id) {
-        var book = findById(id);
+    public Book deleteBook(String id) {
+        var book = this.findById(id);
         bookRepository.delete(book);
         return book;
     }
@@ -40,7 +40,7 @@ public class BookService {
     public BookDto updateBook(String id, BookDto updatedBook) {
         var book = Book.fromDTO(updatedBook);
         book.setId(id);
-        delete(id);
+        deleteBook(id);
         return BookDto.fromBook(bookRepository.save(book));
     }
 }

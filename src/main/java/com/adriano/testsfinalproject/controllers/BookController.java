@@ -33,7 +33,7 @@ public class BookController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<BookDto> removeBook(@PathVariable("id") String id) {
-        return ResponseEntity.ok(BookDto.fromBook(bookService.delete(id)));
+        return ResponseEntity.ok(BookDto.fromBook(bookService.deleteBook(id)));
     }
 
     @PutMapping("/{id}")

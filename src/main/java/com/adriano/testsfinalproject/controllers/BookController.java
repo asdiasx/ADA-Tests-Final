@@ -4,8 +4,8 @@ import com.adriano.testsfinalproject.models.BookDto;
 import com.adriano.testsfinalproject.services.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -21,28 +21,41 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping
-    public List<BookDto> listBooks() {
-        return bookService.listBooks();
+    public ResponseEntity<List<BookDto>> listBooks() {
+        return ResponseEntity.ok(bookService.listBooks());
     }
 
     @GetMapping("/{id}")
-    public BookDto getBook(@PathVariable("id") String id) {
-        return bookService.findById(id);
+    public ResponseEntity<BookDto> getBook(@PathVariable("id") String id) {
+        var answer = bookService.findById(id).orElse(null);
+        if (answer == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(BookDto.fromBook(answer));
     }
 
     @DeleteMapping("/{id}")
-    public void removeBook(@PathVariable("id") String id) {
+    public ResponseEntity<Void> removeBook(@PathVariable("id") String id) {
+        var answer = bookService.findById(id).orElse(null);
+        if (answer == null) {
+            return ResponseEntity.notFound().build();
+        }
         bookService.delete(id);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}")
-    public BookDto updateBook(@PathVariable("id") String id, @Valid @RequestBody BookDto updatedBook) {
-        return bookService.updateBook(id, updatedBook);
+    public ResponseEntity<BookDto> updateBook(@PathVariable("id") String id, @Valid @RequestBody BookDto updatedBook) {
+        var answer = bookService.findById(id).orElse(null);
+        if (answer == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(bookService.updateBook(id, updatedBook));
     }
 
     @PostMapping
-    public BookDto registerBook(@Valid @RequestBody BookDto newBook) {
-        return bookService.saveBook(newBook);
+    public ResponseEntity<BookDto> registerBook(@Valid @RequestBody BookDto newBook) {
+        return ResponseEntity.ok(bookService.saveBook(newBook));
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Transactional
 @RequiredArgsConstructor
@@ -25,8 +26,8 @@ public class BookService {
         return BookDto.fromBook(bookRepository.save(Book.fromDTO(newBook)));
     }
 
-    public BookDto findById(String id) {
-        return BookDto.fromBook(bookRepository.getReferenceById(id));
+    public Optional<Book> findById(String id) {
+        return bookRepository.findById(id);
     }
 
     public void delete(String id) {

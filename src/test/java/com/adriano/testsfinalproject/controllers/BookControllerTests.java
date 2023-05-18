@@ -4,6 +4,7 @@ import com.adriano.testsfinalproject.helpers.BookFactory;
 import com.adriano.testsfinalproject.models.Book;
 import com.adriano.testsfinalproject.models.BookDto;
 import com.adriano.testsfinalproject.services.BookService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

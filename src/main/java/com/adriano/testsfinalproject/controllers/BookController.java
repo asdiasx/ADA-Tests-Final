@@ -1,5 +1,6 @@
 package com.adriano.testsfinalproject.controllers;
 
+import com.adriano.testsfinalproject.models.Book;
 import com.adriano.testsfinalproject.models.BookDto;
 import com.adriano.testsfinalproject.services.BookService;
 import jakarta.validation.Valid;

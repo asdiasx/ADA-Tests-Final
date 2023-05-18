@@ -9,11 +9,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +32,6 @@ public class BookControllerTests {
     BookService bookService;
 
     @Test
-    @DisplayName("Must create the book successfully.")
     void mustCreakeANewBook(){
         Book bookTest = BookFactory.fakeBook("Meu Livro");
         BookDto bookDtoTest = BookDto.fromBook(bookTest);
@@ -106,4 +110,30 @@ public class BookControllerTests {
         assert answer != null;
         assertTrue(answer.isEmpty());
     }
+
+    @Test
+    void mustUpdateABookWithSucess(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        Book bookUpdate = BookFactory.fakeBook("Meu Livro - Updated");
+        BookDto bookDtoUpate = BookDto.fromBook(bookUpdate);
+        BookDto bookTestDto = BookDto.fromBook(bookTest);
+        var existingId = bookTest.getId();
+        when(bookService.updateBook(anyString(),Mockito.any(BookDto.class))).thenReturn(bookTestDto);
+
+
+
+        var answer = bookController.updateBook(existingId,bookDtoUpate);
+
+
+        assertTrue(answer.getStatusCode().is2xxSuccessful());
+        assertEquals(bookTestDto, answer.getBody());
+
+
+
+
+
+
+    }
+
+
 }

@@ -4,10 +4,11 @@ import com.adriano.testsfinalproject.helpers.BookFactory;
 import com.adriano.testsfinalproject.models.Book;
 import com.adriano.testsfinalproject.models.BookDto;
 import com.adriano.testsfinalproject.repositories.BookRepository;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -24,6 +25,21 @@ class BookServiceTests {
 
     @Mock
     BookRepository bookRepository;
+
+
+
+    @Test
+    @DisplayName("Must create the book successfully.")
+    void mustCreakeANewBook(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
+        when(bookRepository.save(any(Book.class))).thenReturn(bookTest);
+
+        var answer = bookService.saveBook(bookDtoTest);
+
+        assertEquals(answer.title(),bookDtoTest.title());
+
+    }
 
     @Test
     void mustRemoveABookThatExists() {

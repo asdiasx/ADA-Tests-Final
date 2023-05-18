@@ -16,8 +16,8 @@ public class BookFactory {
         return new Book(
                 UUID.randomUUID().toString(),
                 title,
-                lorem.getParagraphs(1,1),
-                lorem.getParagraphs(2,3),
+                lorem.getWords(50),
+                lorem.getWords(100),
                 BigDecimal.valueOf(Math.random()*100+20).setScale(2, RoundingMode.HALF_UP),
                 (int) (Math.random()*200+100),
                 ("%3d-%3d-isbn").formatted((int)(Math.random()*999), (int)(Math.random()*999)),

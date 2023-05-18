@@ -5,11 +5,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.*;
+import lombok.extern.log4j.Log4j2;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
+@Log4j2
 @Getter
 @Setter
 @ToString

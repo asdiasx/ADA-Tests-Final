@@ -105,4 +105,24 @@ class BookServiceTests {
 
         assertTrue(answer.isEmpty());
     }
+    @Test
+    @DisplayName("Must update the book successfully.")
+    void mustUpdateABookWithSucess(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        Book bookUpdate = BookFactory.fakeBook("Meu Livro - Updated");
+        BookDto bookDtoUpate = BookDto.fromBook(bookUpdate);
+        BookDto bookTestDto = BookDto.fromBook(bookTest);
+        var existingId = bookTest.getId();
+        when(bookRepository.findById(existingId)).thenReturn(Optional.of(bookTest));
+        when(bookRepository.save(any(Book.class))).thenReturn(bookTest);
+
+        var answer = bookService.updateBook(existingId,bookDtoUpate);
+
+        assertEquals(answer.title(),bookTestDto.title());
+
+
+    }
+
+
+
 }

@@ -4,16 +4,32 @@ import com.adriano.testsfinalproject.helpers.BookFactory;
 import com.adriano.testsfinalproject.models.Book;
 import com.adriano.testsfinalproject.models.BookDto;
 import com.adriano.testsfinalproject.services.BookService;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.Assert;
 
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -26,8 +42,15 @@ public class BookControllerTests {
     @Mock
     BookService bookService;
 
+    private static Validator validator;
+
+    @BeforeAll
+     static void setup(){
+        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+        validator = validatorFactory.getValidator();
+    }
+
     @Test
-    @DisplayName("Must create the book successfully.")
     void mustCreakeANewBook(){
         Book bookTest = BookFactory.fakeBook("Meu Livro");
         BookDto bookDtoTest = BookDto.fromBook(bookTest);
@@ -106,4 +129,124 @@ public class BookControllerTests {
         assert answer != null;
         assertTrue(answer.isEmpty());
     }
+
+    @Test
+    void mustUpdateABookWithSucess(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        Book bookUpdate = BookFactory.fakeBook("Meu Livro - Updated");
+        BookDto bookDtoUpate = BookDto.fromBook(bookUpdate);
+        BookDto bookTestDto = BookDto.fromBook(bookTest);
+        var existingId = bookTest.getId();
+        when(bookService.updateBook(anyString(),Mockito.any(BookDto.class))).thenReturn(bookTestDto);
+
+
+
+        var answer = bookController.updateBook(existingId,bookDtoUpate);
+
+
+        assertTrue(answer.getStatusCode().is2xxSuccessful());
+        assertEquals(bookTestDto, answer.getBody());
+
+    }
+
+    @Test
+    void mustNotValidatedWhenABookDontHaveATitle(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setTitle("");
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
+
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+        assertEquals(1,violations.size());
+
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("O título é obrigatório", violation.getMessage());
+        assertEquals("title", violation.getPropertyPath().toString());
+
+    }
+
+    @Test
+    void mustNotValidatedWhenIsbnIsBlank(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setIsbn("");
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
+
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+        assertEquals(1,violations.size());
+
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("O isbn é obrigatório", violation.getMessage());
+        assertEquals("isbn", violation.getPropertyPath().toString());
+    }
+
+    @Test
+    void mustNotValidatedPriceIsLessThan20(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setPrice(BigDecimal.TEN);
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
+
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+
+        assertEquals(1,violations.size());
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("O preço deve ser no mínimo 20", violation.getMessage());
+        assertEquals("price", violation.getPropertyPath().toString());
+    }
+
+    @Test
+    void mustNotValidatedWhenNumPageIsLessThan100(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setNumPages(80);
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
+
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+
+        assertEquals(1,violations.size());
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("O número de páginas deve ser no mínimo 100", violation.getMessage());
+        assertEquals("numPages", violation.getPropertyPath().toString());
+    }
+
+    @Test
+    void mustNotValidatedWhenDateIsInThePast(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setPublishDate(LocalDate.now().minusDays(1));
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
+
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+
+        assertEquals(1,violations.size());
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("A data deve ser futura", violation.getMessage());
+        assertEquals("publishDate", violation.getPropertyPath().toString());
+    }
+
+    @Test
+    void mustNotValidatedWhenSynopsisIsBlank(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setSynopsis("");
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
+
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+
+        assertEquals(1,violations.size());
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("O resumo é obrigatório", violation.getMessage());
+        assertEquals("synopsis", violation.getPropertyPath().toString());
+    }
+
+    @Test
+    void mustNotValidatedWhenSynopsisIsBiggerThan500Character(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setSynopsis("testetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetesteteste");
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
+
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+
+        assertEquals(1,violations.size());
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("O resumo deve ter no máximo 500 caracteres", violation.getMessage());
+        assertEquals("synopsis", violation.getPropertyPath().toString());
+    }
+
+
 }

@@ -1,11 +1,7 @@
 package com.adriano.testsfinalproject.models;
 
-import com.adriano.testsfinalproject.repositories.BookRepository;
-import com.adriano.testsfinalproject.services.BookService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -15,12 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class BookTests {
-
-    @InjectMocks
-    BookService bookService;
-
-    @Mock
-    BookRepository bookRepository;
 
     @Test
     void mustRemoveABookThatExists() {

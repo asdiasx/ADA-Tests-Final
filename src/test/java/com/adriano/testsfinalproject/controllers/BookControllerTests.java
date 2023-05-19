@@ -4,6 +4,12 @@ import com.adriano.testsfinalproject.helpers.BookFactory;
 import com.adriano.testsfinalproject.models.Book;
 import com.adriano.testsfinalproject.models.BookDto;
 import com.adriano.testsfinalproject.services.BookService;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,9 +17,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.Assert;
 
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,6 +39,14 @@ public class BookControllerTests {
 
     @Mock
     BookService bookService;
+
+    private static Validator validator;
+
+    @BeforeAll
+     static void setup(){
+        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+        validator = validatorFactory.getValidator();
+    }
 
     @Test
     void mustCreakeANewBook(){
@@ -127,12 +145,54 @@ public class BookControllerTests {
         assertTrue(answer.getStatusCode().is2xxSuccessful());
         assertEquals(bookTestDto, answer.getBody());
 
+    }
 
+    @Test
+    void mustNotValidatedWhenABookDontHaveATitle(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setTitle("");
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
 
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+        assertEquals(1,violations.size());
 
-
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("O título é obrigatório", violation.getMessage());
+        assertEquals("title", violation.getPropertyPath().toString());
 
     }
+
+    @Test
+    void mustNotValidadWhenIsbnIsBlank(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setIsbn("");
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
+
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+        assertEquals(1,violations.size());
+
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("O isbn é obrigatório", violation.getMessage());
+        assertEquals("isbn", violation.getPropertyPath().toString());
+    }
+
+    @Test
+    void test(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setNumPages(120);
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
+
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+        assertEquals(1,violations.size());
+
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("O número de páginas deve ser no mínimo 100", violation.getMessage());
+        assertEquals("numPages", violation.getPropertyPath().toString());
+
+        //TODO arrumar o erro e verificar pq só ta funcionando com NotBlank, amanhã de manhã terminar isso
+    }
+
+
 
 
 }

@@ -21,6 +21,7 @@ import org.springframework.util.Assert;
 
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -163,7 +164,7 @@ public class BookControllerTests {
     }
 
     @Test
-    void mustNotValidadWhenIsbnIsBlank(){
+    void mustNotValidatedWhenIsbnIsBlank(){
         Book bookTest = BookFactory.fakeBook("Meu Livro");
         bookTest.setIsbn("");
         BookDto bookDtoTest = BookDto.fromBook(bookTest);
@@ -177,22 +178,74 @@ public class BookControllerTests {
     }
 
     @Test
-    void test(){
+    void mustNotValidatedPriceIsLessThan20(){
         Book bookTest = BookFactory.fakeBook("Meu Livro");
-        bookTest.setNumPages(120);
+        bookTest.setPrice(BigDecimal.TEN);
         BookDto bookDtoTest = BookDto.fromBook(bookTest);
 
         Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
-        assertEquals(1,violations.size());
 
+        assertEquals(1,violations.size());
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("O preço deve ser no mínimo 20", violation.getMessage());
+        assertEquals("price", violation.getPropertyPath().toString());
+    }
+
+    @Test
+    void mustNotValidatedWhenNumPageIsLessThan100(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setNumPages(80);
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
+
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+
+        assertEquals(1,violations.size());
         ConstraintViolation<BookDto> violation = violations.iterator().next();
         assertEquals("O número de páginas deve ser no mínimo 100", violation.getMessage());
         assertEquals("numPages", violation.getPropertyPath().toString());
-
-        //TODO arrumar o erro e verificar pq só ta funcionando com NotBlank, amanhã de manhã terminar isso
     }
 
+    @Test
+    void mustNotValidatedWhenDateIsInThePast(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setPublishDate(LocalDate.now().minusDays(1));
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
 
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+
+        assertEquals(1,violations.size());
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("A data deve ser futura", violation.getMessage());
+        assertEquals("publishDate", violation.getPropertyPath().toString());
+    }
+
+    @Test
+    void mustNotValidatedWhenSynopsisIsBlank(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setSynopsis("");
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
+
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+
+        assertEquals(1,violations.size());
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("O resumo é obrigatório", violation.getMessage());
+        assertEquals("synopsis", violation.getPropertyPath().toString());
+    }
+
+    @Test
+    void mustNotValidatedWhenSynopsisIsBiggerThan500Character(){
+        Book bookTest = BookFactory.fakeBook("Meu Livro");
+        bookTest.setSynopsis("testetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetestetesteteste");
+        BookDto bookDtoTest = BookDto.fromBook(bookTest);
+
+        Set<ConstraintViolation<BookDto>> violations = validator.validate(bookDtoTest);
+
+        assertEquals(1,violations.size());
+        ConstraintViolation<BookDto> violation = violations.iterator().next();
+        assertEquals("O resumo deve ter no máximo 500 caracteres", violation.getMessage());
+        assertEquals("synopsis", violation.getPropertyPath().toString());
+    }
 
 
 }

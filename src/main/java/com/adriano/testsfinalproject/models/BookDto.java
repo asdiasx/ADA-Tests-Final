@@ -9,7 +9,6 @@ import lombok.extern.log4j.Log4j2;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Log4j2
 public record BookDto(
         String id,
         @NotBlank(message = "O título é obrigatório") String title,

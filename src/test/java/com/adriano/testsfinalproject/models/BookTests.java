@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class BookTests {
 
     @Test
-    void mustRemoveABookThatExists() {
+    void mustOutputAStringFromBookObject() {
         Book bookTest = new Book(
                 "id",
                 "titulo",
